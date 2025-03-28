@@ -1,0 +1,1578 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prédiction de Prix des Commodités Minérales</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a56d4;
+            --secondary: #5e60ce;
+            --accent: #7400b8;
+            --success: #38b000;
+            --danger: #e63946;
+            --warning: #ffbe0b;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --gray-light: #e9ecef;
+            --shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            --radius: 12px;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f5f7fa;
+            color: var(--dark);
+            line-height: 1.6;
+            padding: 0;
+            margin: 0;
+        }
+
+        .app-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .app-header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            padding: 2rem;
+            color: white;
+            text-align: center;
+            border-radius: var(--radius) var(--radius) 0 0;
+        }
+
+        .app-header h1 {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 1.75rem;
+        }
+
+        .app-header p {
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+            font-weight: 300;
+        }
+
+        .app-content {
+            padding: 2rem;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 1.5rem;
+            transition: var(--transition);
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--gray-light);
+            display: flex;
+            align-items: center;
+        }
+
+        .card-header h3 {
+            margin: 0;
+            font-weight: 500;
+            color: var(--primary);
+            font-size: 1.1rem;
+        }
+
+        .card-header .icon {
+            margin-right: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 2rem;
+            height: 2rem;
+            background-color: rgba(67, 97, 238, 0.1);
+            border-radius: 50%;
+            color: var(--primary);
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--dark);
+            font-size: 0.9rem;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--gray-light);
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.95rem;
+            transition: var(--transition);
+            background-color: white;
+            color: var(--dark);
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
+        }
+
+        input[type="file"] {
+            padding: 0.6rem;
+        }
+
+        .btn {
+            display: inline-block;
+            font-weight: 500;
+            text-align: center;
+            vertical-align: middle;
+            user-select: none;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            line-height: 1.5;
+            border-radius: 8px;
+            transition: var(--transition);
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .btn-primary {
+            color: white;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            box-shadow: 0 4px 6px rgba(67, 97, 238, 0.2);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 5px 12px rgba(67, 97, 238, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn-block {
+            display: block;
+            width: 100%;
+        }
+
+        .result {
+            background-color: #f8f9fa;
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            border-left: 4px solid var(--primary);
+            transition: var(--transition);
+        }
+
+        .result h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-weight: 500;
+        }
+
+        .result p {
+            margin-bottom: 0.75rem;
+        }
+
+        .chart-container {
+            margin-top: 2rem;
+            border-radius: var(--radius);
+            background-color: white;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .error {
+            color: var(--danger);
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+            display: block;
+        }
+
+        .prediction-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin: 1rem 0;
+        }
+
+        .confidence-interval {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background-color: rgba(67, 97, 238, 0.1);
+            border-radius: 30px;
+            font-size: 0.85rem;
+            color: var(--primary);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-gap: 1.5rem;
+        }
+
+        .file-upload {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-upload-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            background-color: var(--gray-light);
+            color: var(--dark);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            border: 2px dashed var(--gray);
+        }
+
+        .file-upload-label:hover {
+            background-color: rgba(67, 97, 238, 0.1);
+            border-color: var(--primary);
+        }
+
+        .file-upload-input {
+            position: absolute;
+            left: 0;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .file-name {
+            margin-top: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--gray);
+        }
+
+        .algorithm-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .algorithm-card {
+            border: 2px solid var(--gray-light);
+            border-radius: 8px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+        }
+
+        .algorithm-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .algorithm-card.selected {
+            border-color: var(--primary);
+            background-color: rgba(67, 97, 238, 0.05);
+        }
+
+        .algorithm-icon {
+            width: 40px;
+            height: 40px;
+            margin: 0 auto 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            color: white;
+        }
+
+        .algorithm-name {
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+
+        .algorithm-desc {
+            font-size: 0.75rem;
+            color: var(--gray);
+            line-height: 1.4;
+        }
+
+        .algorithm-accuracy {
+            font-size: 0.8rem;
+            margin-top: 0.5rem;
+        }
+
+        .accuracy-meter {
+            height: 4px;
+            background-color: var(--gray-light);
+            border-radius: 2px;
+            margin-top: 0.25rem;
+            overflow: hidden;
+        }
+
+        .accuracy-value {
+            height: 100%;
+            border-radius: 2px;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--gray-light);
+        }
+
+        .tab {
+            padding: 0.75rem 1.25rem;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: var(--transition);
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .tab:hover {
+            color: var(--primary);
+        }
+
+        .tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .parameter-panel {
+            background-color: var(--light);
+            border-radius: 8px;
+            padding: 1rem;
+            display: none;
+        }
+
+        .parameter-panel.active {
+            display: block;
+        }
+
+        .spinner {
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        
+        .result {
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        .metrics-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .metric-box {
+            background-color: white;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .metric-name {
+            font-size: 0.8rem;
+            color: var(--gray);
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-value {
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .app-container {
+                padding: 1rem;
+            }
+
+            .app-header {
+                padding: 1.5rem;
+            }
+
+            .app-header h1 {
+                font-size: 1.5rem;
+            }
+
+            .app-content {
+                padding: 1.5rem;
+            }
+
+            .grid, .algorithm-options, .metrics-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="container">
+            <div class="app-header">
+                <h1>Prédiction de Prix des Commodités Minérales</h1>
+                <p>Analysez les tendances historiques et prédisez les prix futurs avec nos algorithmes avancés</p>
+            </div>
+            
+            <div class="app-content">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10zm0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/>
+                            </svg>
+                        </div>
+                        <h3>Paramètres de la commodité</h3>
+                    </div>
+                    
+                    <div class="card-body">
+                        <div class="grid">
+                            <div class="form-group">
+                                <label for="commodity">Nom de la Commodité</label>
+                                <input type="text" id="commodity" placeholder="Ex: Cuivre, Or, Fer..." required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="predictionPeriod">Période de prédiction (jours)</label>
+                                <input type="number" id="predictionPeriod" min="1" max="365" value="30">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="unit">Unité de Masse</label>
+                                <select id="unit">
+                                    <option value="tonne">Tonne</option>
+                                    <option value="kg">Kilogramme</option>
+                                    <option value="oz">Once</option>
+                                    <option value="lb">Livre</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="currency">Devise</label>
+                                <select id="currency">
+                                    <option value="USD">USD - Dollar américain</option>
+                                    <option value="EUR">EUR - Euro</option>
+                                    <option value="GBP">GBP - Livre sterling</option>
+                                    <option value="JPY">JPY - Yen japonais</option>
+                                    <option value="CHF">CHF - Franc suisse</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <div class="icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
+                                <path d="M7.994 12.25a.75.75 0 0 1-.488-1.13l3.25-4a.75.75 0 0 1 1.227.845L9.274 12.25H7.994zM7.741 10.165l2.451-3.015-2.451-.01v3.025z"/>
+                                <path d="M4.893 10.157l2.784-2.7-1.177-2.098-2.298 1.716.677 3.082z"/>
+                            </svg>
+                        </div>
+                        <h3>Algorithme de prédiction</h3>
+                    </div>
+                    
+                    <div class="card-body">
+                        <div class="algorithm-options">
+                            <div class="algorithm-card selected" data-algorithm="regression">
+                                <div class="algorithm-icon" style="background-color: #4361ee;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                        <path d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2zm4.5 5.5a.5.5 0 0 0 0 1h5.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3a.5.5 0 0 0 0-.708l-3-3a.5.5 0 1 0-.708.708L10.293 7.5H4.5z"/>
+                                    </svg>
+                                </div>
+                                <div class="algorithm-name">Régression linéaire</div>
+                                <div class="algorithm-desc">Modèle simple basé sur la tendance linéaire des données historiques</div>
+                                <div class="algorithm-accuracy">Précision : 
+                                    <div class="accuracy-meter">
+                                        <div class="accuracy-value" style="width: 75%; background-color: #4361ee;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="algorithm-card" data-algorithm="arima">
+                                <div class="algorithm-icon" style="background-color: #7400b8;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                                        <path d="M10.97 4.97a.235.235 0 0 0-.02.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05z"/>
+                                    </svg>
+                                </div>
+                                <div class="algorithm-name">ARIMA</div>
+                                <div class="algorithm-desc">Modèle avancé tenant compte des moyennes mobiles et de l'auto-régression</div>
+                                <div class="algorithm-accuracy">Précision : 
+                                    <div class="accuracy-meter">
+                                        <div class="accuracy-value" style="width: 85%; background-color: #7400b8;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="algorithm-card" data-algorithm="prophet">
+                                <div class="algorithm-icon" style="background-color: #38b000;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                        <path d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
+                                    </svg>
+                                </div>
+                                <div class="algorithm-name">Prophet</div>
+                                <div class="algorithm-desc">Détecte les cycles, saisonnalités et tendances à long terme</div>
+                                <div class="algorithm-accuracy">Précision : 
+                                    <div class="accuracy-meter">
+                                        <div class="accuracy-value" style="width: 90%; background-color: #38b000;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="tabs">
+                            <div class="tab active" data-tab="basic">Paramètres de base</div>
+                            <div class="tab" data-tab="advanced">Paramètres avancés</div>
+                        </div>
+                        
+                        <div class="parameter-panel active" id="basic-params">
+                            <div class="form-group">
+                                <label for="seasonality">Prendre en compte la saisonnalité</label>
+                                <select id="seasonality">
+                                    <option value="auto">Automatique</option>
+                                    <option value="none">Aucune</option>
+                                    <option value="daily">Journalière</option>
+                                    <option value="weekly">Hebdomadaire</option>
+                                    <option value="monthly">Mensuelle</option>
+                                    <option value="quarterly">Trimestrielle</option>
+                                    <option value="yearly">Annuelle</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="trend">Force de la tendance</label>
+                                <select id="trend">
+                                    <option value="auto">Automatique</option>
+                                    <option value="weak">Faible</option>
+                                    <option value="medium">Moyenne</option>
+                                    <option value="strong">Forte</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="parameter-panel" id="advanced-params">
+                            <!-- Paramètres spécifiques à la régression linéaire -->
+                            <div class="algorithm-params" id="regression-params">
+                                <div class="form-group">
+                                    <label for="regression-type">Type de régression</label>
+                                    <select id="regression-type">
+                                        <option value="linear">Linéaire simple</option>
+                                        <option value="polynomial">Polynomiale</option>
+                                        <option value="exponential">Exponentielle</option>
+                                        <option value="logarithmic">Logarithmique</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="poly-degree">Degré polynomial (si applicable)</label>
+                                    <input type="number" id="poly-degree" min="2" max="5" value="2">
+                                </div>
+                            </div>
+                            
+                            <!-- Paramètres spécifiques à ARIMA -->
+                            <div class="algorithm-params" id="arima-params" style="display: none;">
+                                <div class="grid">
+                                    <div class="form-group">
+                                        <label for="p-value">Ordre auto-régressif (p)</label>
+                                        <input type="number" id="p-value" min="0" max="5" value="1">
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="d-value">Ordre de différenciation (d)</label>
+                                        <input type="number" id="d-value" min="0" max="2" value="1">
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="q-value">Ordre moyenne mobile (q)</label>
+                                        <input type="number" id="q-value" min="0" max="5" value="1">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Paramètres spécifiques à Prophet -->
+                            <div class="algorithm-params" id="prophet-params" style="display: none;">
+                                <div class="grid">
+                                    <div class="form-group">
+                                        <label for="changepoint-prior-scale">Flexibilité de la tendance</label>
+                                        <input type="range" id="changepoint-prior-scale" min="0.001" max="0.5" step="0.001" value="0.05">
+                                        <div class="range-value"><span id="changepoint-value">0.05</span></div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="seasonality-prior-scale">Force de la saisonnalité</label>
+                                        <input type="range" id="seasonality-prior-scale" min="0.01" max="10" step="0.01" value="10">
+                                        <div class="range-value"><span id="seasonality-value">10</span></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="holidays">Prise en compte des jours fériés</label>
+                                    <select id="holidays">
+                                        <option value="none">Non</option>
+                                        <option value="global">Jours fériés globaux</option>
+                                        <option value="country">Jours fériés spécifiques au pays</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <div class="icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M4.603 14.087a.81.81 0 0 1-.438-.42c-.195-.388-.13-.776.08-1.102.198-.307.526-.568.897-.787a7.68 7.68 0 0 1 1.482-.645 19.697 19.697 0 0 0 1.062-2.227 7.269 7.269 0 0 1-.43-1.295c-.086-.4-.119-.796-.046-1.136.075-.354.274-.672.65-.823.192-.077.4-.12.602-.077a.7.7 0 0 1 .477.365c.088.164.12.356.127.538.007.188-.012.396-.047.614-.084.51-.27 1.134-.52 1.794a10.954 10.954 0 0 0 .98 1.686 5.753 5.753 0 0 1 1.334.05c.364.066.734.195.96.465.12.144.193.32.2.518.007.192-.047.382-.138.563a1.04 1.04 0 0 1-.354.416.856.856 0 0 1-.51.138c-.331-.014-.654-.196-.933-.417a5.712 5.712 0 0 1-.911-.95 11.651 11.651 0 0 0-1.997.406 11.307 11.307 0 0 1-1.02 1.51c-.292.35-.609.656-.927.787a.793.793 0 0 1-.58.029zm1.379-1.901c-.166.076-.32.156-.459.238-.328.194-.541.383-.647.547-.094.145-.096.25-.04.361.01.022.02.036.026.044a.266.266 0 0 0 .035-.012c.137-.056.355-.235.635-.572a8.18 8.18 0 0 0 .45-.606zm1.64-1.33a12.71 12.71 0 0 1 1.01-.193 11.744 11.744 0 0 1-.51-.858 20.801 20.801 0 0 1-.5 1.05zm2.446.45c.15.163.296.3.435.41.24.19.407.253.498.256a.107.107 0 0 0 .07-.015.307.307 0 0 0 .094-.125.436.436 0 0 0 .059-.2.095.095 0 0 0-.026-.063c-.052-.062-.2-.152-.518-.209a3.876 3.876 0 0 0-.612-.053zM8.078 7.8a6.7 6.7 0 0 0 .2-.828c.031-.188.043-.343.038-.465a.613.613 0 0 0-.032-.198.517.517 0 0 0-.145.04c-.087.035-.158.106-.196.283-.04.192-.03.469.046.822.024.111.054.227.09.346z"/>
+                            </svg>
+                        </div>
+                        <h3>Données historiques</h3>
+                    </div>
+                    
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label>Importer des données historiques (CSV)</label>
+                            <div class="file-upload">
+                                <label class="file-upload-label" for="csvFile">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16" style="margin-right: 8px;">
+                                        <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
+                                        <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z"/>
+                                    </svg>
+                                    Sélectionner ou déposer un fichier CSV
+                                </label>
+                                <input type="file" id="csvFile" accept=".csv" class="file-upload-input">
+                            </div>
+                            <span id="fileName" class="file-name">Aucun fichier sélectionné</span>
+                            <span class="error" id="fileError"></span>
+                        </div>
+                        
+                        <button id="predictBtn" class="btn btn-primary btn-block" onclick="processData()">
+                            Générer la Prédiction
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="result" class="result" style="display: none;">
+                    <h3>Résultats de la Prédiction</h3>
+                    
+                    <div id="commodityInfo"></div>
+                    <div id="predictionValue" class="prediction-value"></div>
+                    
+                    <p id="predictionText"></p>
+                    <span id="confidenceInterval" class="confidence-interval"></span>
+                    
+                    <div class="metrics-container">
+                        <div class="metric-box">
+                            <div class="metric-name">Erreur moyenne (MAE)</div>
+                            <div class="metric-value" id="mae-value">-</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="metric-name">Erreur quadratique (RMSE)</div>
+                            <div class="metric-value" id="rmse-value">-</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="metric-name">Score de fiabilité</div>
+                            <div class="metric-value" id="score-value">-</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <canvas id="chart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        let myChart = null;
+        let selectedAlgorithm = 'regression';
+        let csvData = null;
+        
+        // Gestion des onglets
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                
+                const tabId = this.getAttribute('data-tab');
+                document.querySelectorAll('.parameter-panel').forEach(panel => {
+                    panel.classList.remove('active');
+                });
+                document.getElementById(tabId + '-params').classList.add('active');
+            });
+        });
+        
+        // Sélection de l'algorithme
+        document.querySelectorAll('.algorithm-card').forEach(card => {
+            card.addEventListener('click', function() {
+                document.querySelectorAll('.algorithm-card').forEach(c => c.classList.remove('selected'));
+                this.classList.add('selected');
+                selectedAlgorithm = this.getAttribute('data-algorithm');
+                
+                // Afficher les paramètres spécifiques à l'algorithme
+                document.querySelectorAll('.algorithm-params').forEach(params => {
+                    params.style.display = 'none';
+                });
+                
+                if (document.getElementById(selectedAlgorithm + '-params')) {
+                    document.getElementById(selectedAlgorithm + '-params').style.display = 'block';
+                }
+            });
+        });
+        
+        // Mise à jour des valeurs des curseurs
+        document.getElementById('changepoint-prior-scale').addEventListener('input', function() {
+            document.getElementById('changepoint-value').textContent = this.value;
+        });
+        
+        document.getElementById('seasonality-prior-scale').addEventListener('input', function() {
+            document.getElementById('seasonality-value').textContent = this.value;
+        });
+        
+        // Mise à jour du nom de fichier sélectionné
+        document.getElementById('csvFile').addEventListener('change', function(e) {
+            const fileName = e.target.files[0] ? e.target.files[0].name : 'Aucun fichier sélectionné';
+            document.getElementById('fileName').textContent = fileName;
+            
+            // Lire le fichier
+            if (e.target.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    csvData = event.target.result;
+                };
+                reader.readAsText(e.target.files[0]);
+            }
+        });
+        
+        function processData() {
+            const commodityName = document.getElementById('commodity').value;
+            const unit = document.getElementById('unit').value;
+            const currency = document.getElementById('currency').value;
+            const predictionPeriod = parseInt(document.getElementById('predictionPeriod').value);
+            const fileInput = document.getElementById('csvFile');
+            const fileError = document.getElementById('fileError');
+            
+            // Validation de base
+            if (!commodityName) {
+                alert("Veuillez entrer le nom de la commodité");
+                return;
+            }
+            
+            if (!fileInput.files.length) {
+                fileError.textContent = "Veuillez sélectionner un fichier CSV";
+                return;
+            } else {
+                fileError.textContent = "";
+            }
+
+            // Afficher un état de chargement
+            const predictBtn = document.getElementById('predictBtn');
+            const originalText = predictBtn.innerHTML;
+            predictBtn.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" class="spinner">
+                    <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
+                    <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
+                </svg>
+                Traitement en cours...
+            `;
+            predictBtn.disabled = true;
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                try {
+                    const csvData = e.target.result;
+                    const data = parseCSV(csvData);
+                    
+                    if (data.length < 10) {
+                        fileError.textContent = "Le fichier CSV doit contenir au moins 10 points de données";
+                        predictBtn.innerHTML = originalText;
+                        predictBtn.disabled = false;
+                        return;
+                    }
+                    
+                    // Simuler un délai de traitement pour l'effet
+                    setTimeout(() => {
+                        let prediction;
+                        
+                        // Appeler la fonction appropriée selon l'algorithme sélectionné
+                        switch (selectedAlgorithm) {
+                            case 'regression':
+                                const regressionType = document.getElementById('regression-type').value;
+                                const polyDegree = parseInt(document.getElementById('poly-degree').value);
+                                prediction = predictWithRegression(data, predictionPeriod, regressionType, polyDegree);
+                                break;
+                            case 'arima':
+                                const p = parseInt(document.getElementById('p-value').value);
+                                const d = parseInt(document.getElementById('d-value').value);
+                                const q = parseInt(document.getElementById('q-value').value);
+                                prediction = predictWithARIMA(data, predictionPeriod, p, d, q);
+                                break;
+                            case 'prophet':
+                                const cpScale = parseFloat(document.getElementById('changepoint-prior-scale').value);
+                                const sScale = parseFloat(document.getElementById('seasonality-prior-scale').value);
+                                const holidays = document.getElementById('holidays').value;
+                                prediction = predictWithProphet(data, predictionPeriod, cpScale, sScale, holidays);
+                                break;
+                            default:
+                                prediction = predictWithRegression(data, predictionPeriod);
+                        }
+                        
+                        displayResults(commodityName, unit, currency, data, prediction);
+                        
+                        predictBtn.innerHTML = originalText;
+                        predictBtn.disabled = false;
+                    }, 1500);
+                    
+                } catch (error) {
+                    fileError.textContent = "Erreur lors de l'analyse du fichier CSV: " + error.message;
+                    predictBtn.innerHTML = originalText;
+                    predictBtn.disabled = false;
+                }
+            };
+            
+            reader.readAsText(file);
+        }
+        
+        function parseCSV(csvText) {
+            // Format attendu: date,prix
+            const lines = csvText.trim().split('\n');
+            const data = [];
+            
+            // Ignorer l'en-tête si présent
+            const startIndex = lines[0].toLowerCase().includes('date') ? 1 : 0;
+            
+            for (let i = startIndex; i < lines.length; i++) {
+                const parts = lines[i].split(',');
+                if (parts.length >= 2) {
+                    const date = new Date(parts[0]);
+                    const price = parseFloat(parts[1]);
+                    
+                    if (!isNaN(date.getTime()) && !isNaN(price)) {
+                        data.push({date, price});
+                    }
+                }
+            }
+            
+            // Trier par date croissante
+            return data.sort((a, b) => a.date - b.date);
+        }
+        
+        function predictWithRegression(data, predictionDays, regressionType = 'linear', polyDegree = 2) {
+            const x = data.map((_, i) => i);
+            const y = data.map(item => item.price);
+            
+            const n = x.length;
+            
+            let predictions = [];
+            let formula = {};
+            
+            // Fonction pour calculer des valeurs prédites et erreurs
+            function calculatePredictions(func) {
+                let errorSum = 0;
+                let absErrorSum = 0;
+                
+                for (let i = 0; i < n; i++) {
+                    const predicted = func(i);
+                    const error = y[i] - predicted;
+                    errorSum += error * error;
+                    absErrorSum += Math.abs(error);
+                }
+                
+                const rmse = Math.sqrt(errorSum / n);
+                const mae = absErrorSum / n;
+                const reliability = 100 - (mae / (Math.max(...y) - Math.min(...y))) * 100;
+                
+                const today = new Date();
+                const preds = [];
+                
+                for (let i = 1; i <= predictionDays; i++) {
+                    const predictedIndex = n + i - 1;
+                    const predictedPrice = func(predictedIndex);
+                    
+                    // Calculer l'intervalle de confiance (proportionnel à RMSE)
+                    const confidenceInterval = 1.96 * rmse * Math.sqrt(1 + 1/n + Math.pow(predictedIndex - n/2, 2) / (n * n / 12));
+                    
+                    const futureDate = new Date(today);
+                    futureDate.setDate(today.getDate() + i);
+                    
+                    preds.push({
+                        date: futureDate,
+                        price: predictedPrice,
+                        lower: Math.max(0, predictedPrice - confidenceInterval),
+                        upper: predictedPrice + confidenceInterval
+                    });
+                }
+                
+                return {
+                    predictions: preds,
+                    metrics: {
+                        rmse,
+                        mae,
+                        reliability: reliability.toFixed(2)
+                    }
+                };
+            }
+            
+            // Différents types de régression
+            switch (regressionType) {
+                case 'linear': {
+                    // Régression linéaire
+                    let sumX = 0, sumY = 0, sumXY = 0, sumXX = 0;
+                    
+                    for (let i = 0; i < n; i++) {
+                        sumX += x[i];
+                        sumY += y[i];
+                        sumXY += x[i] * y[i];
+                        sumXX += x[i] * x[i];
+                    }
+                    
+                    const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+                    const intercept = (sumY - slope * sumX) / n;
+                    
+                    formula = { type: 'linear', slope, intercept };
+                    const func = (x) => slope * x + intercept;
+                    const result = calculatePredictions(func);
+                    
+                    return {
+                        predictions: result.predictions,
+                        formula,
+                        metrics: result.metrics
+                    };
+                }
+                
+                case 'polynomial': {
+                    // Régression polynomiale
+                    // Implémentation simplifiée - dans une véritable application, 
+                    // on utiliserait une bibliothèque comme regression.js
+                    
+                    // Simulons une régression polynomiale avec légère courbure
+                    let sumX = 0, sumY = 0, sumXY = 0, sumXX = 0, sumX2Y = 0, sumX2X2 = 0, sumXX2 = 0;
+                    
+                    for (let i = 0; i < n; i++) {
+                        const xi = x[i];
+                        const xi2 = Math.pow(xi, 2);
+                        
+                        sumX += xi;
+                        sumY += y[i];
+                        sumXY += xi * y[i];
+                        sumXX += xi * xi;
+                        sumX2Y += xi2 * y[i];
+                        sumX2X2 += xi2 * xi2;
+                        sumXX2 += xi * xi2;
+                    }
+                    
+                    // Coefficients simplifiés
+                    const a = 0.0001; // Coefficient quadratique (simplifié)
+                    const b = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX); // Coefficient linéaire 
+                    const c = (sumY - b * sumX - a * sumXX) / n; // Constante
+                    
+                    formula = { type: 'polynomial', degree: polyDegree, a, b, c };
+                    const func = (x) => a * Math.pow(x, 2) + b * x + c;
+                    const result = calculatePredictions(func);
+                    
+                    return {
+                        predictions: result.predictions,
+                        formula,
+                        metrics: result.metrics
+                    };
+                }
+                
+                case 'exponential': {
+                    // Régression exponentielle (y = ae^(bx))
+                    // Transformée en logarithme: ln(y) = ln(a) + bx
+                    
+                    // Filtrer les valeurs non positives
+                    const validIndices = [];
+                    const validY = [];
+                    
+                    for (let i = 0; i < n; i++) {
+                        if (y[i] > 0) {
+                            validIndices.push(i);
+                            validY.push(Math.log(y[i]));
+                        }
+                    }
+                    
+                    const validN = validIndices.length;
+                    let sumX = 0, sumY = 0, sumXY = 0, sumXX = 0;
+                    
+                    for (let i = 0; i < validN; i++) {
+                        const xi = validIndices[i];
+                        sumX += xi;
+                        sumY += validY[i];
+                        sumXY += xi * validY[i];
+                        sumXX += xi * xi;
+                    }
+                    
+                    const b = (validN * sumXY - sumX * sumY) / (validN * sumXX - sumX * sumX);
+                    const lnA = (sumY - b * sumX) / validN;
+                    const a = Math.exp(lnA);
+                    
+                    formula = { type: 'exponential', a, b };
+                    const func = (x) => a * Math.exp(b * x);
+                    const result = calculatePredictions(func);
+                    
+                    return {
+                        predictions: result.predictions,
+                        formula,
+                        metrics: result.metrics
+                    };
+                }
+                
+                case 'logarithmic': {
+                    // Régression logarithmique (y = a + b*ln(x))
+                    
+                    // Filtrer les valeurs x <= 0
+                    const validIndices = [];
+                    const validX = [];
+                    
+                    for (let i = 0; i < n; i++) {
+                        if (x[i] > 0) {
+                            validIndices.push(i);
+                            validX.push(Math.log(x[i] + 1)); // +1 pour éviter log(0)
+                        }
+                    }
+                    
+                    const validN = validIndices.length;
+                    let sumX = 0, sumY = 0, sumXY = 0, sumXX = 0;
+                    
+                    for (let i = 0; i < validN; i++) {
+                        const xi = validX[i];
+                        const yi = y[validIndices[i]];
+                        sumX += xi;
+                        sumY += yi;
+                        sumXY += xi * yi;
+                        sumXX += xi * xi;
+                    }
+                    
+                    const b = (validN * sumXY - sumX * sumY) / (validN * sumXX - sumX * sumX);
+                    const a = (sumY - b * sumX) / validN;
+                    
+                    formula = { type: 'logarithmic', a, b };
+                    const func = (x) => a + b * Math.log(x + 1);
+                    const result = calculatePredictions(func);
+                    
+                    return {
+                        predictions: result.predictions,
+                        formula,
+                        metrics: result.metrics
+                    };
+                }
+                
+                default:
+                    // Par défaut, utiliser une régression linéaire
+                    return predictWithRegression(data, predictionDays, 'linear');
+            }
+        }
+        
+        function predictWithARIMA(data, predictionDays, p = 1, d = 1, q = 1) {
+            // Simuler une prédiction ARIMA (dans une application réelle, on utiliserait une bibliothèque dédiée)
+            const prices = data.map(item => item.price);
+            
+            // Différenciation simple pour simuler d=1
+            const diffPrices = [];
+            for (let i = 1; i < prices.length; i++) {
+                diffPrices.push(prices[i] - prices[i-1]);
+            }
+            
+            // Moyenne des différences
+            const avgDiff = diffPrices.reduce((a, b) => a + b, 0) / diffPrices.length;
+            
+            // Écart-type des différences pour l'intervalle de confiance
+            const diffVariance = diffPrices.reduce((a, b) => a + Math.pow(b - avgDiff, 2), 0) / diffPrices.length;
+            const diffStdDev = Math.sqrt(diffVariance);
+            
+            // Autocorrélation des différences (simplifiée)
+            let autoCorrSum = 0;
+            for (let i = 1; i < diffPrices.length; i++) {
+                autoCorrSum += (diffPrices[i] - avgDiff) * (diffPrices[i-1] - avgDiff);
+            }
+            const autoCorr = autoCorrSum / (diffPrices.length * diffVariance);
+            
+            // Pour simuler l'effet des paramètres p, d, q
+            const pFactor = Math.min(1, p * 0.3); // Poids de l'auto-régression
+            const qFactor = Math.min(1, q * 0.2); // Poids de la moyenne mobile
+            
+            // Un peu d'aléatoire pour simuler le comportement ARIMA
+            function arimaNextValue(prev, prevDiff) {
+                return prev + (pFactor * autoCorr * prevDiff + (1 - pFactor) * avgDiff);
+            }
+            
+            // Mesurer l'erreur à rebours pour simuler des métriques
+            let errorSum = 0;
+            let absErrorSum = 0;
+            let testData = [...prices];
+            let testDiffs = [...diffPrices];
+            
+            for (let i = 0; i < Math.min(20, testData.length / 3); i++) {
+                const lastIndex = testData.length - 1;
+                const predicted = arimaNextValue(testData[lastIndex], testDiffs[testDiffs.length - 1]);
+                const actual = testData[lastIndex] + (testDiffs.length > 1 ? testDiffs[testDiffs.length - 1] : avgDiff);
+                
+                const error = predicted - actual;
+                errorSum += error * error;
+                absErrorSum += Math.abs(error);
+                
+                // Ajouter la valeur prédite
+                testData.push(predicted);
+                testDiffs.push(predicted - testData[testData.length - 2]);
+            }
+            
+            const rmse = Math.sqrt(errorSum / 20);
+            const mae = absErrorSum / 20;
+            const reliability = 100 - (mae / (Math.max(...prices) - Math.min(...prices))) * 100;
+            
+            // Générer les prédictions
+            const predictions = [];
+            const lastPrice = prices[prices.length - 1];
+            let currentPrice = lastPrice;
+            let currentDiff = diffPrices[diffPrices.length - 1];
+            const today = new Date();
+            
+            for (let i = 1; i <= predictionDays; i++) {
+                currentPrice = arimaNextValue(currentPrice, currentDiff);
+                currentDiff = currentPrice - (i === 1 ? lastPrice : predictions[predictions.length - 1].price);
+                
+                const futureDate = new Date(today);
+                futureDate.setDate(today.getDate() + i);
+                
+                // Intervalle de confiance basé sur l'erreur cumulée
+                const confidenceFactor = 1.96; // Z-score pour 95% de confiance
+                const timeFactorError = Math.sqrt(i) * diffStdDev;
+                
+                predictions.push({
+                    date: futureDate,
+                    price: currentPrice,
+                    lower: Math.max(0, currentPrice - confidenceFactor * timeFactorError),
+                    upper: currentPrice + confidenceFactor * timeFactorError
+                });
+            }
+            
+            return {
+                predictions,
+                formula: { type: 'ARIMA', parameters: { p, d, q }, autoCorr, avgDiff },
+                metrics: { rmse, mae, reliability: reliability.toFixed(2) }
+            };
+        }
+        
+        function predictWithProphet(data, predictionDays, changePointScale = 0.05, seasonalityScale = 10, holidaysOption = 'none') {
+            // Simuler Prophet (dans une application réelle, on utiliserait Prophet.js ou une API Python)
+            const dates = data.map(item => item.date);
+            const prices = data.map(item => item.price);
+            
+            // Calculer la tendance avec une régression polynomiale
+            const x = data.map((_, i) => i);
+            const n = x.length;
+            
+            // Régression polynomiale simple
+            let sumX = 0, sumY = 0, sumXY = 0, sumXX = 0, sumX2Y = 0, sumX2X2 = 0, sumXX2 = 0;
+            
+            for (let i = 0; i < n; i++) {
+                const xi = x[i];
+                const xi2 = Math.pow(xi, 2);
+                
+                sumX += xi;
+                sumY += prices[i];
+                sumXY += xi * prices[i];
+                sumXX += xi * xi;
+                sumX2Y += xi2 * prices[i];
+                sumX2X2 += xi2 * xi2;
+                sumXX2 += xi * xi2;
+            }
+            
+            // Coefficient quadratique (simplifié)
+            const a = changePointScale * 0.0002; 
+            const b = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX); 
+            const c = (sumY - b * sumX - a * sumXX) / n;
+            
+            // Détection de saisonnalité (simplifiée)
+            // 1. Décomposer la série pour extraire la tendance
+            const trend = x.map(xi => a * Math.pow(xi, 2) + b * xi + c);
+            
+            // 2. Résidus (prix - tendance)
+            const residuals = prices.map((price, i) => price - trend[i]);
+            
+            // 3. Simuler quelques composantes saisonnières 
+            // Trouver une périodicité approximative via autocorrélation
+            let maxCorr = 0;
+            let bestPeriod = 1;
+            
+            // Test pour des périodes entre 2 et 30
+            for (let period = 2; period <= 30 && period < residuals.length / 3; period++) {
+                let correlation = 0;
+                let count = 0;
+                
+                for (let i = 0; i < residuals.length - period; i++) {
+                    correlation += residuals[i] * residuals[i + period];
+                    count++;
+                }
+                
+                correlation /= count;
+                
+                if (Math.abs(correlation) > Math.abs(maxCorr)) {
+                    maxCorr = correlation;
+                    bestPeriod = period;
+                }
+            }
+            
+            // Simuler l'effet de saisonnalité
+            function seasonalComponent(day) {
+                const adjustedScale = seasonalityScale / 10;
+                return adjustedScale * maxCorr * Math.sin(2 * Math.PI * day / bestPeriod);
+            }
+            
+            // Simuler l'effet des jours fériés (pour démonstration)
+            function holidayEffect(date) {
+                if (holidaysOption === 'none') return 0;
+                
+                // Effet simple: les prédictions autour des fins de mois sont légèrement plus élevées
+                const dayOfMonth = date.getDate();
+                if (dayOfMonth >= 28 || dayOfMonth <= 2) {
+                    return (Math.random() * 0.02 + 0.01) * Math.max(...prices); // 1-3% d'effet
+                }
+                
+                return 0;
+            }
+            
+            // Mesurer l'erreur sur les dernières données
+            let errorSum = 0;
+            let absErrorSum = 0;
+            const testSize = Math.min(20, Math.floor(prices.length * 0.2));
+            
+            for (let i = prices.length - testSize; i < prices.length; i++) {
+                const dayNum = i;
+                const predicted = trend[i] + seasonalComponent(dayNum) + holidayEffect(dates[i]);
+                const error = prices[i] - predicted;
+                
+                errorSum += error * error;
+                absErrorSum += Math.abs(error);
+            }
+            
+            const rmse = Math.sqrt(errorSum / testSize);
+            const mae = absErrorSum / testSize;
+            const reliability = 100 - (mae / (Math.max(...prices) - Math.min(...prices))) * 100;
+            
+            // Générer les prédictions
+            const predictions = [];
+            const lastDateNum = n - 1;
+            const today = new Date();
+            
+            for (let i = 1; i <= predictionDays; i++) {
+                const futureDate = new Date(today);
+                futureDate.setDate(today.getDate() + i);
+                
+                const dayNum = lastDateNum + i;
+                const trendComponent = a * Math.pow(dayNum, 2) + b * dayNum + c;
+                const seasonal = seasonalComponent(dayNum);
+                const holiday = holidayEffect(futureDate);
+                
+                const predictedPrice = trendComponent + seasonal + holiday;
+                
+                // L'incertitude augmente avec l'horizon de prédiction
+                const uncertainty = rmse * Math.sqrt(1 + i/30);
+                
+                predictions.push({
+                    date: futureDate,
+                    price: predictedPrice,
+                    lower: Math.max(0, predictedPrice - uncertainty * 1.96),
+                    upper: predictedPrice + uncertainty * 1.96
+                });
+            }
+            
+            return {
+                predictions,
+                formula: { 
+                    type: 'Prophet', 
+                    trend: { a, b, c }, 
+                    seasonality: { period: bestPeriod, amplitude: maxCorr },
+                    hyperparameters: { changePointScale, seasonalityScale }
+                },
+                metrics: { rmse, mae, reliability: reliability.toFixed(2) }
+            };
+        }
+        
+        function displayResults(commodity, unit, currency, historicalData, prediction) {
+            const result = document.getElementById('result');
+            const predictionText = document.getElementById('predictionText');
+            const confidenceInterval = document.getElementById('confidenceInterval');
+            const commodityInfo = document.getElementById('commodityInfo');
+            const predictionValue = document.getElementById('predictionValue');
+            
+            // Afficher les métriques
+            document.getElementById('mae-value').textContent = prediction.metrics.mae.toFixed(2) + ' ' + currency;
+            document.getElementById('rmse-value').textContent = prediction.metrics.rmse.toFixed(2) + ' ' + currency;
+            document.getElementById('score-value').textContent = prediction.metrics.reliability + '%';
+            
+            // Afficher le prix prédit pour la dernière date
+            const lastPrediction = prediction.predictions[prediction.predictions.length - 1];
+            const formattedDate = lastPrediction.date.toLocaleDateString();
+            const formattedPrice = lastPrediction.price.toFixed(2);
+            
+            commodityInfo.innerHTML = `<strong>${commodity}</strong> (${currency}/${unit})`;
+            predictionValue.innerHTML = `${formattedPrice} <small>${currency}</small>`;
+            
+            predictionText.innerHTML = `Prix prédit pour le <strong>${formattedDate}</strong>`;
+            
+            confidenceInterval.innerHTML = `Intervalle: ${lastPrediction.lower.toFixed(2)} - ${lastPrediction.upper.toFixed(2)} ${currency}`;
+            
+            // Animation d'entrée
+            result.style.opacity = 0;
+            result.style.display = 'block';
+            setTimeout(() => {
+                result.style.opacity = 1;
+            }, 10);
+            
+            // Créer le graphique
+            renderChart(commodity, unit, currency, historicalData, prediction);
+        }
+        
+        function renderChart(commodity, unit, currency, historicalData, prediction) {
+            const ctx = document.getElementById('chart').getContext('2d');
+            
+            // Détruire le graphique existant s'il y en a un
+            if (myChart) {
+                myChart.destroy();
+            }
+            
+            // Préparer les données pour le graphique
+            const historicalDates = historicalData.map(item => item.date.toLocaleDateString());
+            const historicalPrices = historicalData.map(item => item.price);
+            
+            const predictionDates = prediction.predictions.map(item => item.date.toLocaleDateString());
+            const predictionPrices = prediction.predictions.map(item => item.price);
+            const lowerBound = prediction.predictions.map(item => item.lower);
+            const upperBound = prediction.predictions.map(item => item.upper);
+            
+            // Définir les couleurs selon l'algorithme sélectionné
+            let primaryColor, secondaryColor;
+            
+            switch (selectedAlgorithm) {
+                case 'regression':
+                    primaryColor = '#4361ee';
+                    secondaryColor = '#3a0ca3';
+                    break;
+                case 'arima':
+                    primaryColor = '#7400b8';
+                    secondaryColor = '#6930c3';
+                    break;
+                case 'prophet':
+                    primaryColor = '#38b000';
+                    secondaryColor = '#008000';
+                    break;
+                default:
+                    primaryColor = '#4361ee';
+                    secondaryColor = '#3a0ca3';
+            }
+            
+            // Obtenir le nom de l'algorithme pour l'affichage
+            let algorithmName;
+            switch (selectedAlgorithm) {
+                case 'regression':
+                    const regType = document.getElementById('regression-type').value;
+                    algorithmName = regType.charAt(0).toUpperCase() + regType.slice(1);
+                    break;
+                case 'arima':
+                    const p = document.getElementById('p-value').value;
+                    const d = document.getElementById('d-value').value;
+                    const q = document.getElementById('q-value').value;
+                    algorithmName = `ARIMA(${p},${d},${q})`;
+                    break;
+                case 'prophet':
+                    algorithmName = 'Prophet';
+                    break;
+                default:
+                    algorithmName = 'Régression linéaire';
+            }
+            
+            myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [...historicalDates, ...predictionDates],
+                    datasets: [
+                        {
+                            label: 'Données historiques',
+                            data: [...historicalPrices, ...Array(predictionDates.length).fill(null)],
+                            borderColor: primaryColor,
+                            backgroundColor: `${primaryColor}15`,
+                            borderWidth: 3,
+                            pointRadius: 3,
+                            pointBackgroundColor: primaryColor,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Prédiction',
+                            data: [...Array(historicalDates.length).fill(null), ...predictionPrices],
+                            borderColor: secondaryColor,
+                            backgroundColor: `${secondaryColor}15`,
+                            borderWidth: 3,
+                            borderDash: [5, 5],
+                            pointRadius: 4,
+                            pointBackgroundColor: secondaryColor,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Limite inférieure',
+                            data: [...Array(historicalDates.length).fill(null), ...lowerBound],
+                            borderColor: `${secondaryColor}40`,
+                            backgroundColor: 'transparent',
+                            borderWidth: 1,
+                            pointRadius: 0,
+                            borderDash: [3, 3],
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Limite supérieure',
+                            data: [...Array(historicalDates.length).fill(null), ...upperBound],
+                            borderColor: `${secondaryColor}40`,
+                            backgroundColor: `${secondaryColor}10`,
+                            borderWidth: 1,
+                            pointRadius: 0,
+                            borderDash: [3, 3],
+                            fill: '+1',
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: `Prédiction du prix de ${commodity} avec ${algorithmName} (${currency}/${unit})`,
+                            font: {
+                                size: 16,
+                                weight: 'normal'
+                            },
+                            padding: {
+                                bottom: 20
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                            titleColor: '#212529',
+                            bodyColor: '#212529',
+                            borderColor: '#e9ecef',
+                            borderWidth: 1,
+                            cornerRadius: 8,
+                            boxPadding: 6,
+                            usePointStyle: true,
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += context.parsed.y.toFixed(2) + ' ' + currency;
+                                    }
+                                    return label;
+                                }
+                            }
+                        },
+                        legend: {
+                            labels: {
+                                usePointStyle: true,
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                maxRotation: 45,
+                                minRotation: 45
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: `Prix (${currency})`
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 1500,
+                        easing: 'easeOutQuart'
+                    }
+                }
+            });
+        }
+
+        // Ajouter un effet de surbrillance pour les paramètres selon l'algorithme sélectionné
+        function updateParameterVisibility() {
+            document.querySelectorAll('.algorithm-params').forEach(el => {
+                el.style.display = 'none';
+            });
+            
+            const paramsEl = document.getElementById(selectedAlgorithm + '-params');
+            if (paramsEl) {
+                paramsEl.style.display = 'block';
+            }
+        }
+
+        // Initialiser l'interface
+        updateParameterVisibility();
+    </script>
+</body>
+</html>
